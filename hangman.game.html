@@ -1,0 +1,667 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Anatomy Guess Game</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+
+  <body>
+
+    <div id="signInSection">
+  <h1>Yo Guess</h1>
+
+  
+
+  <label for="playerNameInput">Enter your name:</label>
+
+  <input
+    id="playerNameInput"
+    type="text"
+    placeholder="Player name"
+  >
+
+  <button id="signInButton">Start Game</button>
+
+  <p id="signInMessage"></p>
+</div>
+
+<div class="game-container" id="gameSection">
+
+  <div id="starShop">
+  <p id="starDisplay">⭐ Stars: 0</p>
+  <button id="buyHintButton">
+    Buy Hint ⭐ 3
+  </button>
+</div>
+
+    <h1>Yo Guess</h1>
+
+      <p id="welcomeMessage"></p>
+
+
+    <p id="category">Category: Anatomy</p>
+
+    <p id="wordDisplay">_ _ _ _ _ _</p>
+    <p id="hintDisplay"></p>
+
+   <input id="letterInput" type="text" placeholder="Guess a letter or the whole word">
+
+    <button id="guessButton">Guess</button>
+    <button id="logoutButton">Log Out</button>
+
+    <p id="wrongLetters">Wrong Letter:</p>
+
+    <p id="lives">Lives: 5</p>
+
+    <p id="score">Score: 0</p>
+
+    <p id="message"></p>
+
+    <button id="resetButton">New Game</button>
+    <button id="hintButton">Hint</button>
+  </div>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script> 
+    
+    <script>
+
+      const words = [
+        'heart',
+        'anatomy',
+        'brain',
+        'femur',
+        'triceps',
+        'tibia',
+        'blood',
+        'liver',
+        'clot',
+        'blood clot',
+        'small intestine',
+        'large intestine',
+        'spinal cord',
+        'rotator cuff',
+        'red blood cell',
+        'perineum',
+        'thoracic',
+        'rhomboids',
+        'superior',
+        'inferior',
+        'anterior',
+        'medial',
+        'lateral',
+        'distal',
+        'thrombosis',
+        'cephalic',
+        'gluteal',
+        'patellar',
+        'fibula',
+        'radius',
+        'ulna',
+        'clavicle',
+        'scapula',
+        'sternum',
+        'pelvis',
+        'kidney',
+        'stomach',
+        'pancreas',
+        'bladder',
+        'spine',
+        'rib'
+      ];
+/********************************************/
+//                Definitions
+/********************************************/
+
+const definitions = {
+  heart: "A muscular organ that pumps blood throughout the body.",
+  anatomy: "The study of the structure of the human body and its parts.",
+  brain: "The organ that controls thought, memory, movement, and body functions.",
+  femur: "The thigh bone and the longest, strongest bone in the human body.",
+  triceps: "A muscle on the back of the upper arm that straightens the elbow.",
+  tibia: "The larger of the two lower leg bones, also called the shinbone.",
+  blood: "The fluid that carries oxygen, nutrients, and waste throughout the body.",
+  liver: "A large organ that filters blood, stores nutrients, and produces bile.",
+  clot: "A thickened mass of blood that forms to stop bleeding.",
+  "blood clot": "A mass of blood that forms inside a blood vessel or wound.",
+  "small intestine": "The part of the digestive system where most nutrients are absorbed.",
+  "large intestine": "The part of the digestive system that absorbs water and forms stool.",
+  "spinal cord": "A bundle of nerves that carries signals between the brain and the body.",
+  "rotator cuff": "A group of four muscles and tendons that stabilize and move the shoulder.",
+  "red blood cell": "A blood cell that carries oxygen from the lungs to the body's tissues.",
+  perineum: "The area between the anus and the external genital organs.",
+  thoracic: "Relating to the chest or thorax.",
+  rhomboids: "Upper back muscles that pull the shoulder blades toward the spine.",
+  superior: "Toward the head or upper part of the body.",
+  inferior: "Toward the feet or lower part of the body.",
+  anterior: "Toward the front of the body.",
+  medial: "Toward the midline of the body.",
+  lateral: "Away from the midline of the body.",
+  distal: "Farther from the point of attachment or origin.",
+  thrombosis: "The formation of a blood clot inside a blood vessel.",
+  cephalic: "Relating to the head.",
+  gluteal: "Relating to the buttock region.",
+  patellar: "Relating to the kneecap (patella).",
+  fibula: "The smaller bone on the outer side of the lower leg.",
+  radius: "The forearm bone on the thumb side.",
+  ulna: "The forearm bone on the little finger side.",
+  clavicle: "The collarbone that connects the shoulder to the breastbone.",
+  scapula: "The shoulder blade.",
+  sternum: "The breastbone located in the center of the chest.",
+  pelvis: "The bony structure that supports the spine and protects pelvic organs.",
+  kidney: "An organ that filters waste and excess water from the blood.",
+  stomach: "A muscular organ that begins the digestion of food.",
+  pancreas: "An organ that produces digestive enzymes and hormones such as insulin.",
+  bladder: "A hollow organ that stores urine before it leaves the body.",
+  spine: "The vertebral column that supports the body and protects the spinal cord.",
+  rib: "One of the curved bones that protect the heart and lungs."
+};
+
+/*******************************************/
+//        Function for the hints
+/*******************************************/
+ function showHint() {
+  hintDisplay.textContent =
+    definitions[selectedWord] || "No hint is available for this word.";
+}
+
+
+
+/********************************************/
+      let randomIndex = Math.floor(Math.random() * words.length);
+      let selectedWord = words[randomIndex];
+
+      let guessedLetters = [];
+      let wrongLetters = [];
+      let lives = 5;
+let score = Number(localStorage.getItem('score')) || 0;
+
+let stars =
+  Number(localStorage.getItem('stars')) || 0;
+
+const hintCost = 3;
+
+/*******************************************/
+//        Storing elements into variables   //
+/********************************************/
+
+const category = document.getElementById('category');
+      const wordDisplay = document.getElementById('wordDisplay');
+      const letterInput = document.getElementById('letterInput');
+      const guessButton = document.getElementById('guessButton');
+      const wrongLettersDisplay = document.getElementById('wrongLetters');
+      const livesDisplay = document.getElementById('lives');
+      const resetButton = document.getElementById('resetButton');
+      const messageDisplay = document.getElementById('message');
+      const hintButton = document.getElementById('hintButton');
+      const hintDisplay = document.getElementById('hintDisplay');
+      const scoreDisplay = document.getElementById('score');
+
+      scoreDisplay.textContent = 'Score: ' + score;
+
+      const signInSection = document.getElementById('signInSection');
+
+      const gameSection = document.getElementById('gameSection');
+
+      const playerNameInput = document.getElementById('playerNameInput');
+
+      const signInButton = document.getElementById('signInButton');
+
+      const signInMessage = document.getElementById('signInMessage');
+
+      const welcomeMessage = document.getElementById('welcomeMessage');
+
+      const logoutButton =
+  document.getElementById('logoutButton');
+
+  const starDisplay =
+  document.getElementById('starDisplay');
+
+const buyHintButton =
+  document.getElementById('buyHintButton');
+
+  starDisplay.textContent =
+  '⭐ Stars: ' + stars;
+/********************************************/
+//              Display Word 
+//                Function
+/*******************************************/
+ function displayWord() {
+  let display = '';
+
+  for (let letter of selectedWord) {
+    if (letter === ' ') {
+      display += '  ';
+    } else if (guessedLetters.includes(letter)) {
+      display += letter + ' ';
+    } else {
+      display += '_ ';
+    }
+  }
+
+  wordDisplay.textContent = display;
+}
+/********************************************/
+//              Make Guess
+//              Function
+/*******************************************/
+function makeGuess() {
+  const guess = letterInput.value.trim().toLowerCase();
+
+  // Stop if the input is empty
+  if (guess === '') {
+    messageDisplay.textContent =
+      'Please enter a letter or word.';
+
+    return;
+  }
+
+  /********************************************/
+  //          Whole-word guessing
+  /********************************************/
+  if (guess.length > 1) {
+    if (guess === selectedWord.toLowerCase()) {
+      wordDisplay.textContent = selectedWord;
+
+      messageDisplay.textContent =
+        'Correct! You guessed the word!';
+
+      score++;
+      stars++;
+
+      scoreDisplay.textContent =
+        'Score: ' + score;
+
+      starDisplay.textContent =
+        '⭐ Stars: ' + stars;
+
+      localStorage.setItem('score', score);
+      localStorage.setItem('stars', stars);
+
+      celebrateWin();
+
+      guessButton.disabled = true;
+      letterInput.disabled = true;
+
+      setTimeout(startNewRound, 2000);
+    } else {
+      lives--;
+
+      livesDisplay.textContent =
+        'Lives: ' + lives;
+
+      messageDisplay.textContent =
+        'That is not the correct word.';
+
+      if (lives === 0) {
+        wordDisplay.textContent = selectedWord;
+
+        messageDisplay.textContent =
+          'Game over! The word was: ' +
+          selectedWord;
+
+        guessButton.disabled = true;
+        letterInput.disabled = true;
+
+        setTimeout(startNewRound, 2000);
+      }
+    }
+
+    letterInput.value = '';
+    letterInput.focus();
+
+    return;
+  }
+
+  /********************************************/
+  //          Single-letter guessing
+  /********************************************/
+
+  // Prevent duplicate letter guesses
+  if (guessedLetters.includes(guess)) {
+    messageDisplay.textContent =
+      'You already guessed the letter "' +
+      guess +
+      '".';
+
+    letterInput.value = '';
+    letterInput.focus();
+
+    return;
+  }
+
+  // Save the letter
+  guessedLetters.push(guess);
+
+  // Correct letter
+  if (selectedWord.includes(guess)) {
+    messageDisplay.textContent =
+      'Correct! The letter "' +
+      guess +
+      '" is in the word.';
+
+    displayWord();
+
+    // Check whether the entire word is complete
+    const wordCompleted =
+      [...selectedWord].every(function(letter) {
+        return (
+          letter === ' ' ||
+          guessedLetters.includes(letter)
+        );
+      });
+
+    if (wordCompleted) {
+      wordDisplay.textContent = selectedWord;
+
+      messageDisplay.textContent =
+        'Correct! You completed the word!';
+
+      score++;
+      stars++;
+
+      scoreDisplay.textContent =
+        'Score: ' + score;
+
+      starDisplay.textContent =
+        '⭐ Stars: ' + stars;
+
+      localStorage.setItem('score', score);
+      localStorage.setItem('stars', stars);
+
+      celebrateWin();
+
+      guessButton.disabled = true;
+      letterInput.disabled = true;
+
+      setTimeout(startNewRound, 2000);
+    }
+  } else {
+    /********************************************/
+    //              Wrong letter
+    /********************************************/
+
+    wrongLetters.push(guess);
+    lives--;
+
+    wrongLettersDisplay.textContent =
+      'Wrong Letters: ' +
+      wrongLetters.join(', ');
+
+    livesDisplay.textContent =
+      'Lives: ' + lives;
+
+    messageDisplay.textContent =
+      'The letter "' +
+      guess +
+      '" is not in the word.';
+
+    if (lives === 0) {
+      wordDisplay.textContent = selectedWord;
+
+      messageDisplay.textContent =
+        'Game over! The word was: ' +
+        selectedWord;
+
+      guessButton.disabled = true;
+      letterInput.disabled = true;
+
+      setTimeout(startNewRound, 2000);
+    }
+  }
+
+  letterInput.value = '';
+
+  if (!letterInput.disabled) {
+    letterInput.focus();
+  }
+  return;
+}
+
+
+
+/********************************************/
+//        Start New Round Function
+/********************************************/
+
+function startNewRound() {
+  let newWord;
+
+  do {
+    randomIndex =
+      Math.floor(Math.random() * words.length);
+
+    newWord = words[randomIndex];
+
+  } while (newWord === selectedWord);
+
+  selectedWord = newWord;
+
+  guessedLetters = [];
+  wrongLetters = [];
+  lives = 5;
+
+  livesDisplay.textContent = 'Lives: 5';
+  wrongLettersDisplay.textContent = 'Wrong Letters:';
+  messageDisplay.textContent = '';
+  hintDisplay.textContent = '';
+
+  letterInput.value = '';
+  letterInput.disabled = false;
+  guessButton.disabled = false;
+
+
+  displayWord();
+  letterInput.focus();
+}
+/********************************************/
+//              Star Function
+/********************************************/
+function buyAdditionalHint() {
+  if (stars < hintCost) {
+    messageDisplay.textContent =
+      'You need 3 stars to purchase a hint.';
+
+    return;
+  }
+
+  const availableLetters =
+    [...selectedWord].filter(function(letter) {
+      return (
+        letter !== ' ' &&
+        !guessedLetters.includes(letter)
+      );
+    });
+
+  if (availableLetters.length === 0) {
+    messageDisplay.textContent =
+      'There are no letters left to reveal.';
+
+    return;
+  }
+
+  const randomLetter =
+    availableLetters[
+      Math.floor(
+        Math.random() * availableLetters.length
+      )
+    ];
+
+  guessedLetters.push(randomLetter);
+
+  stars -= hintCost;
+
+  starDisplay.textContent =
+    '⭐ Stars: ' + stars;
+
+  localStorage.setItem('stars', stars);
+
+  messageDisplay.textContent =
+    'The letter "' + randomLetter +
+    '" was revealed.';
+
+  displayWord();
+}
+/********************************************/
+//                Confetti
+//                Function
+//                Celebrate 
+/*******************************************/
+function celebrateWin() {
+  confetti({
+    particleCount: 250,
+    spread: 180,
+    origin: {
+      y: 0.6
+    }
+  });
+}
+
+
+/********************************************/
+//                Reset Game
+/********************************************/
+/********************************************/
+//                Reset Game
+/********************************************/
+function resetGame() {
+
+  let newWord;
+
+  do {
+    randomIndex =
+      Math.floor(Math.random() * words.length);
+
+    newWord = words[randomIndex];
+
+  } while (newWord === selectedWord);
+
+  selectedWord = newWord;
+
+  guessedLetters = [];
+  wrongLetters = [];
+  lives = 5;
+
+  wrongLettersDisplay.textContent =
+    'Wrong Letters:';
+
+  livesDisplay.textContent =
+    'Lives: 5';
+
+  messageDisplay.textContent = '';
+
+  hintDisplay.textContent = '';
+  letterInput.value = '';
+
+  guessButton.disabled = false;
+  letterInput.disabled = false;
+
+  displayWord();
+  letterInput.focus();
+}
+
+/********************************************/
+//           Sign in Player Function
+/********************************************/
+function signInPlayer() {
+  const playerName = playerNameInput.value.trim();
+
+  if (playerName === '') {
+    signInMessage.textContent =
+      'Please enter your name.';
+    return;
+  }
+
+  localStorage.setItem('playerName', playerName);
+
+  welcomeMessage.textContent =
+    'Welcome, ' + playerName + '!';
+
+  signInSection.style.display = 'none';
+  gameSection.style.display = 'block';
+
+  letterInput.focus();
+}
+
+
+/********************************************/
+//                Logout Function
+/*******************************************/
+function logoutPlayer() {
+  localStorage.removeItem('playerName');
+
+  score = 0;
+  localStorage.setItem('score', score);
+  scoreDisplay.textContent = 'Score: 0';
+
+  welcomeMessage.textContent = '';
+  playerNameInput.value = '';
+  signInMessage.textContent = '';
+
+  gameSection.style.display = 'none';
+  signInSection.style.display = 'block';
+
+  resetGame();
+
+  playerNameInput.focus();
+}
+
+
+/********************************************/
+//            Event listener
+/********************************************/
+
+buyHintButton.addEventListener(
+  'click',
+  buyAdditionalHint
+);
+
+guessButton.addEventListener('click', makeGuess);
+
+letterInput.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    makeGuess();
+  }
+});
+
+resetButton.addEventListener('click', resetGame);
+
+hintButton.addEventListener('click', showHint);
+
+displayWord();
+letterInput.focus();
+
+signInButton.addEventListener('click', signInPlayer);
+
+playerNameInput.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    signInPlayer();
+  }
+});
+
+const savedPlayerName =
+  localStorage.getItem('playerName');
+
+if (savedPlayerName) {
+  welcomeMessage.textContent =
+    'Welcome back, ' + savedPlayerName + '!';
+
+  signInSection.style.display = 'none';
+  gameSection.style.display = 'block';
+} else {
+  signInSection.style.display = 'block';
+  gameSection.style.display = 'none';
+}
+
+console.log('Selected Word:', selectedWord);
+
+logoutButton.addEventListener('click', logoutPlayer);
+
+
+
+      
+    </script>
+    <footer>
+  © 2026 Steven Griffin Sr.
+  
+</footer>
+  </body>
+</html>
